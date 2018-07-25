@@ -76,7 +76,11 @@ def main():
         else:
             outfilename = "{}-{}{}".format(outfile[0], i, outfile[1])
 
-        replace_possible_values_with_all_values(outfilename, infile, next(split_lists))
+        current_list = next(split_lists)
+        list_length = len(current_list[0])
+        replace_possible_values_with_all_values(outfilename, infile, current_list)
+        print("Generated {out} with {length} combinations: ./one.sh -b {length} {out}".format(out=outfilename,
+                                                                                              length=list_length))
 
 
 if __name__ == "__main__":
