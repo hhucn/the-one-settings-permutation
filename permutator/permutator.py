@@ -47,15 +47,21 @@ def replace_possible_values_with_all_values(settings_out: str, settings_in: str,
 
 def split_lists_evenly(all_values: List[Tuple[str]], count: int) -> List[Tuple[str]]:
     length = len(all_values[0])
-    step = length // count
+    step, remainder = divmod(length, count)
 
-    for i in range(0, length, step):
+    long_step = step + 1
+    long_end = remainder * long_step
+
+    for i in range(0, long_end, long_step):
+        yield [x[i:i + long_step] for x in all_values]
+
+    for i in range(long_end, length, step):
         yield [x[i:i + step] for x in all_values]
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate settings file(s) for The ONE containing permutations of possible values")
+            description="Generate settings file(s) for The ONE containing permutations of possible values")
     parser.add_argument("infile", type=str, help="Settings file to read from")
     parser.add_argument("outfile", type=str, help="Settings file to generate")
     parser.add_argument("-s", "--split", type=int, default=1, help="Split output settings permutations into x files")
@@ -70,13 +76,12 @@ def main():
 
     split_lists = split_lists_evenly(all_values, split_count)
 
-    for i in range(split_count):
+    for index, current_list in enumerate(split_lists):
         if split_count == 1:
             outfilename = "{}{}".format(*outfile)
         else:
-            outfilename = "{}-{}{}".format(outfile[0], i, outfile[1])
+            outfilename = "{}-{}{}".format(outfile[0], index + 1, outfile[1])
 
-        current_list = next(split_lists)
         list_length = len(current_list[0])
         replace_possible_values_with_all_values(outfilename, infile, current_list)
         print("Generated {out} with {length} combinations: ./one.sh -b {length} {out}".format(out=outfilename,
